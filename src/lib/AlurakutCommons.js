@@ -19,8 +19,10 @@ function Link({ href, children, ...props }) {
 // ================================================================================================================
 // Menu
 // ================================================================================================================
-export function AlurakutMenu({ githubUser }) {
+export function AlurakutMenu({ gitHubUser }) {
   const [isMenuOpen, setMenuState] = React.useState(false);
+  
+
   return (
     <AlurakutMenu.Wrapper isMenuOpen={isMenuOpen}>
       <div className="container">
@@ -48,7 +50,7 @@ export function AlurakutMenu({ githubUser }) {
           {!isMenuOpen && <img src={`${BASE_URL}/icons/menu-closed.svg?v=${v}`} />}
         </button>
       </div>
-      <AlurakutMenuProfileSidebar githubUser={githubUser} />
+      <AlurakutMenuProfileSidebar gitHubUser={gitHubUser} />
     </AlurakutMenu.Wrapper>
   )
 }
@@ -71,8 +73,9 @@ AlurakutMenu.Wrapper = styled.header`
     @media(min-width: 860px) {
       display: none;
     }
+    
     > div {
-      max-width: 400px;
+      max-width: 200px;
       margin: auto;
     }
     a {
@@ -162,15 +165,15 @@ AlurakutMenu.Logo = styled.img`
   height: 34px;
 `;
 
-function AlurakutMenuProfileSidebar({ githubUser }) {
+function AlurakutMenuProfileSidebar({ gitHubUser }) {
   return (
     <div className="alurakutMenuProfileSidebar">
       <div>
-        <img src={`https://github.com/${githubUser}.png`} style={{ borderRadius: '8px' }} />
+        <img src={`https://github.com/${gitHubUser}.png`} style={{ borderRadius: '8px' }}/>
         <hr />
         <p>
-          <a className="boxLink" href={`/user/${githubUser}`}>
-            @{githubUser}
+          <a className="boxLink" href={`/user/${gitHubUser}`}>
+            @{gitHubUser}
           </a>
         </p>
         <hr />
