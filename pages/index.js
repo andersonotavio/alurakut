@@ -1,27 +1,30 @@
 import React from 'react';
+import nookies from 'nookies';
+import jwt from 'jsonwebtoken';
+import MainGrid from '../src/components/MainGrid'
+import Box from '../src/components/Box'
+import { AlurakutMenu, AlurakutProfileSidebarMenuDefault, OrkutNostalgicIconSet } from '../src/lib/AlurakutCommons';
+import { ProfileRelationsBoxWrapper } from '../src/components/ProfileRelations';
 
-import MainGrid from '../src/Components/MainGrid'
-import Box from '../src/Components/Box'
-import { AlurakutMenu, AlurakutProfileSidebarMenuDefault, OrkutNostalgicIconSet } from '../src/lib/AlurakutCommons'
-import { ProfileRelationsBoxWrapper } from '../src/Components/ProfileRelations'
-
-function ProfileSideBar({ gitHubUser }){
+function ProfileSidebar({ githubUser }) {
   return (
-    <Box>
-        <img src={`https://github.com/${gitHubUser}.png`} style={{ borderRadius: '8px'}} />
-        <hr/>
-        <p>
-          <a className="boxLink" href={`https://github.com/${gitHubUser}`}>
-           @{gitHubUser}
-          </a>
-        </p>
-        <hr/>
+    <Box as="aside">
+      <img src={`https://github.com/${githubUser}.png`} style={{ borderRadius: '8px' }} />
+      <hr />
+
+      <p>
+        <a className="boxLink" href={`https://github.com/${githubUser}`}>
+          @{githubUser}
+        </a>
+      </p>
+      <hr />
+
       <AlurakutProfileSidebarMenuDefault />
     </Box>
   )
 }
 
-function ProfileRelationsBox({ title, items}) {
+function ProfileRelationsBox({ title, items }) {
   return (
     <ProfileRelationsBoxWrapper>
       <h2 className="smallTitle">
@@ -43,13 +46,10 @@ function ProfileRelationsBox({ title, items}) {
   )
 }
 
-
-export default function Home() {
-
-  const gitHubUser = 'andersonotavio'
-  
+export default function Home({ githubUser }) {
+  const usuarioAleatorio = {githubUser};
   const [comunidades, setComunidades] = React.useState([]);
-
+  
   const pessoasFavoritas = [
     'juunegreiros',
     'omariosouto',
@@ -57,11 +57,12 @@ export default function Home() {
     'rafaballerini',
     'isadorastan',
     'gustavoguanabara',
+    
   ]
-
   const [seguidores, setSeguidores] = React.useState([]);
-   
+ 
   React.useEffect(function() {
+    
     fetch('https://api.github.com/users/peas/followers')
     .then(function (respostaDoServidor) {
       return respostaDoServidor.json();
@@ -69,6 +70,7 @@ export default function Home() {
     .then(function(respostaCompleta) {
       setSeguidores(respostaCompleta);
     })
+
 
     // API GraphQL
     fetch('https://graphql.datocms.com/', {
@@ -93,14 +95,21 @@ export default function Home() {
       console.log(comunidadesVindasDoDato)
       setComunidades(comunidadesVindasDoDato)
     })
+  
+
   }, [])
 
+  console.log('seguidores antes do return', seguidores);
+
+
+
   return (
-  <>
-    <AlurakutMenu gitHubUser={gitHubUser}/>
+    <>
+      <AlurakutMenu githubUser={githubUser} />
       <MainGrid>
+        
         <div className="profileArea" style={{ gridArea: 'profileArea' }}>
-          <ProfileSideBar gitHubUser={gitHubUser} />
+          <ProfileSidebar githubUser={githubUser} />
         </div>
         <div className="welcomeArea" style={{ gridArea: 'welcomeArea' }}>
           <Box>
@@ -117,11 +126,15 @@ export default function Home() {
                 e.preventDefault();
                 const dadosDoForm = new FormData(e.target);
 
+                console.log('Campo: ', dadosDoForm.get('title'));
+                console.log('Campo: ', dadosDoForm.get('image'));
+
                 const comunidade = {
                   title: dadosDoForm.get('title'),
                   imageUrl: dadosDoForm.get('image'),
-                  creatorSlug: gitHubUser,
+                  creatorSlug: usuarioAleatorio,
                 }
+
                 fetch('/api/comunidades', {
                   method: 'POST',
                   headers: {
@@ -136,7 +149,6 @@ export default function Home() {
                   const comunidadesAtualizadas = [...comunidades, comunidade];
                   setComunidades(comunidadesAtualizadas)
                 })
-                
             }}>
               <div>
                 <input
@@ -161,14 +173,14 @@ export default function Home() {
           </Box>
         </div>
         <div className="profileRelationsArea" style={{ gridArea: 'profileRelationsArea' }}>
-        <ProfileRelationsBox title="Seguidores" items={seguidores} />
-        <ProfileRelationsBoxWrapper>
+          <ProfileRelationsBox title="Seguidores" items={seguidores} />
+          <ProfileRelationsBoxWrapper>
             <h2 className="smallTitle">
               Pessoas da comunidade ({pessoasFavoritas.length})
             </h2>
 
             <ul>
-              {pessoasFavoritas.map((itemAtual) => {
+              {pessoasFavoritas.slice(0,6).map((itemAtual) => {
                 return (
                   <li key={itemAtual}>
                     <a href={`/users/${itemAtual}`}>
@@ -185,10 +197,10 @@ export default function Home() {
               Comunidades ({comunidades.length})
             </h2>
             <ul>
-              {comunidades.map((itemAtual) => {
+              {comunidades.slice(0,6).map((itemAtual) => {
                 return (
                   <li key={itemAtual.id}>
-                    <a href={`/communites/${itemAtual.id}`}>
+                    <a href={`/communities/${itemAtual.id}`}>
                       <img src={itemAtual.imageUrl} />
                       <span>{itemAtual.title}</span>
                     </a>
@@ -199,6 +211,37 @@ export default function Home() {
           </ProfileRelationsBoxWrapper>
         </div>
       </MainGrid>
-  </>
+    </>
   )
+}
+
+
+export async function getServerSideProps(ctx) {
+  const cookies = nookies.get(ctx);
+  const token = cookies.USER_TOKEN;
+  const decodedToken = jwt.decode(token);
+  const githubUser = decodedToken?.githubUser;
+
+  if (!githubUser) {
+    return {
+      redirect: {
+        destination: '/login',
+        permanent: false,
+      },
+    }
+  }
+
+  // const followers = await fetch(`https://api.github.com/users/${githubUser}/followers`)
+  //   .then((res) => res.json())
+  //   .then(followers => followers.map((follower) => ({
+  //     id: follower.id,
+  //     name: follower.login,
+  //     image: follower.avatar_url,
+  //   })));
+
+  return {
+    props: {
+      githubUser,
+    }
+  }
 }

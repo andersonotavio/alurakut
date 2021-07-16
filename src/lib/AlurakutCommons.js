@@ -1,5 +1,7 @@
 import React from 'react';
 import styled, { css } from 'styled-components';
+import { destroyCookie } from 'nookies';
+import { useRouter } from 'next/router';
 import NextLink from 'next/link';
 
 const BASE_URL = 'http://alurakut.vercel.app/';
@@ -19,9 +21,15 @@ function Link({ href, children, ...props }) {
 // ================================================================================================================
 // Menu
 // ================================================================================================================
-export function AlurakutMenu({ gitHubUser }) {
+export function AlurakutMenu({ githubUser }) {
   const [isMenuOpen, setMenuState] = React.useState(false);
-  
+  const [logout, setLogout] = React.useState(githubUser)
+  const router = useRouter()
+  function handleLogout() {
+    destroyCookie(null, 'USER_TOKEN', { path: '/', maxAge: 86400 * 7 });
+    setLogout(false)
+    router.push('/login');
+  }
 
   return (
     <AlurakutMenu.Wrapper isMenuOpen={isMenuOpen}>
@@ -37,7 +45,7 @@ export function AlurakutMenu({ gitHubUser }) {
         </nav>
 
         <nav>
-          <a href={`/logout`}>
+          <a  onClick={handleLogout}>
             Sair
           </a>
           <div>
@@ -50,16 +58,17 @@ export function AlurakutMenu({ gitHubUser }) {
           {!isMenuOpen && <img src={`${BASE_URL}/icons/menu-closed.svg?v=${v}`} />}
         </button>
       </div>
-      <AlurakutMenuProfileSidebar gitHubUser={gitHubUser} />
+      <AlurakutMenuProfileSidebar githubUser={githubUser} />
     </AlurakutMenu.Wrapper>
   )
 }
 AlurakutMenu.Wrapper = styled.header`
   width: 100%;
   background-color: #308BC5;
+
   .alurakutMenuProfileSidebar {
     background: white;
-    position: fixed;
+    position:  ${({ isMenuOpen }) => isMenuOpen ? 'block' : 'fixed'};
     z-index: 100;
     padding: 46px;
     bottom: 0;
@@ -73,7 +82,6 @@ AlurakutMenu.Wrapper = styled.header`
     @media(min-width: 860px) {
       display: none;
     }
-    
     > div {
       max-width: 200px;
       margin: auto;
@@ -88,6 +96,7 @@ AlurakutMenu.Wrapper = styled.header`
       text-decoration: none;
       font-weight: 800;
     }
+
     hr {
       margin-top: 12px;
       margin-bottom: 8px;
@@ -95,6 +104,7 @@ AlurakutMenu.Wrapper = styled.header`
       border-bottom-color: #ECF2FA;
     }
   }
+
   .container {
     background-color: #308BC5;
     padding: 7px 16px;
@@ -107,6 +117,7 @@ AlurakutMenu.Wrapper = styled.header`
     @media(min-width: 860px) {
       justify-content: flex-start;
     }
+
     button {
       border: 0;
       background: transparent;
@@ -116,6 +127,7 @@ AlurakutMenu.Wrapper = styled.header`
         display: none;
       }
     }
+
     nav {
       display: none;
       @media(min-width: 860px) {
@@ -165,15 +177,15 @@ AlurakutMenu.Logo = styled.img`
   height: 34px;
 `;
 
-function AlurakutMenuProfileSidebar({ gitHubUser }) {
+function AlurakutMenuProfileSidebar({ githubUser }) {
   return (
     <div className="alurakutMenuProfileSidebar">
       <div>
-        <img src={`https://github.com/${gitHubUser}.png`} style={{ borderRadius: '8px' }}/>
+        <img src={`https://github.com/${githubUser}.png`} style={{ borderRadius: '8px' }} />
         <hr />
         <p>
-          <a className="boxLink" href={`/user/${gitHubUser}`}>
-            @{gitHubUser}
+          <a className="boxLink" href={`/user/${githubUser}`}>
+            @{githubUser}
           </a>
         </p>
         <hr />
@@ -337,6 +349,8 @@ const AlurakutLoginScreen = css`
     --textQuarternaryColor: #C5C6CA;
     --commonRadius: 8px;
   }
+
+
   .loginScreen {
     padding: 16px;
     max-width: 1110px;
@@ -499,5 +513,6 @@ export const AlurakutStyles = css`
       box-shadow: 0px 0px 5px #33333357;
     }
   }
+
   ${AlurakutLoginScreen}
 `;
