@@ -1,12 +1,12 @@
 import React from 'react';
 import nookies from 'nookies';
 import jwt from 'jsonwebtoken';
-import MainGrid from '../src/components/MainGrid'
-import Box from '../src/components/Box'
+import MainGrid from '../src/Components/MainGrid'
+import Box from '../src/Components/Box'
 import { AlurakutMenu, AlurakutProfileSidebarMenuDefault, OrkutNostalgicIconSet } from '../src/lib/AlurakutCommons';
 import { ProfileRelationsBoxWrapper } from '../src/components/ProfileRelations';
 
-function ProfileSidebar({ githubUser }) {
+function ProfileSidebar({ githubUser}) {
   return (
     <Box as="aside">
       <img src={`https://github.com/${githubUser}.png`} style={{ borderRadius: '8px' }} />
