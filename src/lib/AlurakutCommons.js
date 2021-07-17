@@ -23,6 +23,7 @@ function Link({ href, children, ...props }) {
 // ================================================================================================================
 export function AlurakutMenu({ githubUser }) {
   const [isMenuOpen, setMenuState] = React.useState(false);
+  
   const [logout, setLogout] = React.useState(githubUser)
   const router = useRouter()
   function handleLogout() {
@@ -45,7 +46,7 @@ export function AlurakutMenu({ githubUser }) {
         </nav>
 
         <nav>
-          <a  onClick={handleLogout}>
+          <a onClick={handleLogout}>
             Sair
           </a>
           <div>
